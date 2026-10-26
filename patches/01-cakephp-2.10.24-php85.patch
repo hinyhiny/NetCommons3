@@ -1,0 +1,80 @@
+--- a/vendors/cakephp/cakephp/lib/Cake/Console/Shell.php
++++ b/vendors/cakephp/cakephp/lib/Cake/Console/Shell.php
+@@ -354,6 +354,10 @@
+  * @link https://book.cakephp.org/2.0/en/console-and-shells.html#Shell::hasMethod
+  */
+ 	public function hasMethod($name) {
++		// PHP8: ReflectionMethod() は null/空文字を受け付けない (TypeError)
++		if (!is_string($name) || $name === '') {
++			return false;
++		}
+ 		try {
+ 			$method = new ReflectionMethod($this, $name);
+ 			if (!$method->isPublic() || substr($name, 0, 1) === '_') {
+--- a/vendors/cakephp/cakephp/lib/Cake/Utility/Folder.php
++++ b/vendors/cakephp/cakephp/lib/Cake/Utility/Folder.php
+@@ -226,10 +226,10 @@
+ 		}
+ 
+ 		if ($dirs) {
+-			$dirs = call_user_func_array('array_merge', $dirs);
++			$dirs = call_user_func_array('array_merge', array_values($dirs));
+ 		}
+ 		if ($files) {
+-			$files = call_user_func_array('array_merge', $files);
++			$files = call_user_func_array('array_merge', array_values($files));
+ 		}
+ 		return array($dirs, $files);
+ 	}
+--- a/vendors/cakephp/cakephp/lib/Cake/Model/Datasource/DboSource.php
++++ b/vendors/cakephp/cakephp/lib/Cake/Model/Datasource/DboSource.php
+@@ -2462,7 +2462,16 @@
+ 				$this->logQuery('COMMIT');
+ 			}
+ 			$this->_transactionStarted = false;
+-			return $this->_connection->commit();
++			// PHP8: MySQL の DDL は暗黙コミットするため、PDO 側では
++			// すでにトランザクションが無いことがある (PHP8 では例外になる)
++			try {
++				return $this->_connection->commit();
++			} catch (PDOException $e) {
++				if (stripos($e->getMessage(), 'no active transaction') !== false) {
++					return true;
++				}
++				throw $e;
++			}
+ 		}
+ 
+ 		if ($this->nestedTransactionSupported()) {
+@@ -2506,7 +2515,14 @@
+ 				$this->logQuery('ROLLBACK');
+ 			}
+ 			$this->_transactionStarted = false;
+-			return $this->_connection->rollBack();
++			try {
++				return $this->_connection->rollBack();
++			} catch (PDOException $e) {
++				if (stripos($e->getMessage(), 'no active transaction') !== false) {
++					return true;
++				}
++				throw $e;
++			}
+ 		}
+ 
+ 		if ($this->nestedTransactionSupported()) {
+--- a/vendors/cakephp/cakephp/lib/Cake/Model/Datasource/Database/Mysql.php
++++ b/vendors/cakephp/cakephp/lib/Cake/Model/Datasource/Database/Mysql.php
+@@ -164,7 +164,12 @@
+ 		$flags = $config['flags'] + array(
+ 			PDO::ATTR_PERSISTENT => $config['persistent'],
+ 			PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
++			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
++			// PHP8: mysqlnd が native type (int/float) を返すようになり、
++			// NetCommons の `===` 比較 (例: space_id と Space::PRIVATE_SPACE_ID) が
++			// 外れる。CakePHP2 は全カラムを文字列として扱う前提なので明示的に固定する。
++			PDO::ATTR_STRINGIFY_FETCHES => true,
++			PDO::ATTR_EMULATE_PREPARES => true
+ 		);
+ 
+ 		if (!empty($config['encoding'])) {

@@ -1,0 +1,30 @@
+--- a/app/Plugin/Migrations/Lib/MigrationVersion.php
++++ b/app/Plugin/Migrations/Lib/MigrationVersion.php
+@@ -252,7 +252,10 @@
+ 
+ 		ksort($mapping);
+ 		foreach ($mapping as $version => $migration) {
+-			list($name, $class) = each($migration);
++			// PHP8: each() removed -> key/value を明示的に取得
++			reset($migration);
++			$name = key($migration);
++			$class = current($migration);
+ 
+ 			$mapping[$version] = array(
+ 				'version' => $version, 'name' => $name, 'class' => $class,
+@@ -439,7 +442,14 @@
+ 		if (!in_array($db->fullTableName('schema_migrations', false, false), $db->listSources())) {
+ 			$map = $this->_enumerateMigrations('migrations');
+ 
+-			list($name, $class) = each($map[1]);
++			// PHP8: each() removed. 依存を version=1 固定から「先頭エントリ」に変更
++			$first = reset($map);
++			if ($first === false) {
++				throw new MigrationVersionException('No migration files found in the Migrations Plugin.');
++			}
++			reset($first);
++			$name = key($first);
++			$class = current($first);
+ 			$migration = $this->getMigration($name, $class, 'Migrations');
+ 			$migration->run('up');
+ 			$this->setVersion(1, 'Migrations');

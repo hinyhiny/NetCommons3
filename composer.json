@@ -55,8 +55,12 @@
         }
     },
     "scripts": {
-        "post-install-cmd": ["app/Console/cake install.install install_bower"],
+        "post-install-cmd": [
+            "sh scripts/apply-php85-patches.sh",
+            "app/Console/cake install.install install_bower"
+        ],
         "post-update-cmd": [
+            "sh scripts/apply-php85-patches.sh",
             "app/Console/cake install.install install_bower"
          ]
     }
