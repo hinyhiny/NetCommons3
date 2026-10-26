@@ -601,12 +601,12 @@
             "version": "0.0.4",
             "source": {
                 "type": "git",
-                "url": "https://github.com/emotionLoop/visualCaptcha-packagist.git",
-                "reference": "fd1bcd8c3571aecefc1a1eedb8c76a61da031b56"
+                "url": "https://github.com/NetCommons3/emotionloop-visualcaptcha.git",
+                "reference": "master"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/emotionLoop/visualCaptcha-packagist/zipball/fd1bcd8c3571aecefc1a1eedb8c76a61da031b56",
+                "url": "https://codeload.github.com/NetCommons3/emotionloop-visualcaptcha/zip/refs/heads/master",
                 "reference": "fd1bcd8c3571aecefc1a1eedb8c76a61da031b56",
                 "shasum": ""
             },

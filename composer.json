@@ -47,6 +47,9 @@
     "config": {
         "vendor-dir": "vendors",
         "process-timeout": 3000,
+        "platform": {
+            "php": "7.4.33"
+        },
         "allow-plugins": {
             "composer/installers": true
         }
