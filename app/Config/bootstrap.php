@@ -26,6 +26,24 @@
 // See http://mark-story.com/posts/view/installing-cakephp-with-composer
 require ROOT . '/vendors/autoload.php';
 
+/**
+ * PHP 8.1 以降、$_FILES の各エントリに 'full_path' が自動的に追加される。
+ * CakePHP2 の CakeRequest::_processFiles() は $_FILES のキーをそのまま
+ * request->data へ流し込むため、'Model.field.full_path' が混入して
+ * SecurityComponent の _Token[fields]（フォーム項目ハッシュ）と一致しなくなり、
+ * ファイル付き POST が全て black-hole（400 Bad Request）になる。
+ * CakeRequest が生成される前に取り除いて回避する。
+ * （vendors 側は無改造のまま。composer install / update で消える心配がないここで対処する）
+ */
+if (!empty($_FILES) && is_array($_FILES['data'] ?? null)) {
+	foreach ($_FILES['data'] as $ncFilesKey => $ncFilesValue) {
+		if ($ncFilesKey === 'full_path') {
+			unset($_FILES['data'][$ncFilesKey]);
+		}
+	}
+	unset($ncFilesKey, $ncFilesValue);
+}
+
 // Remove and re-prepend CakePHP's autoloader as composer thinks it is the most important.
 // See https://github.com/composer/composer/commit/c80cb76b9b5082ecc3e5b53b1050f76bb27b127b
 spl_autoload_unregister(array('App', 'load'));
@@ -79,6 +97,7 @@ Cache::config('default', array('engine' => 'File'));
  *
  */
 CakePlugin::load('NetCommons', array('bootstrap' => true, 'routes' => true));
+CakePlugin::load('Install');
 
 /**
  * You can attach event listeners to the request lifecycle as Dispatcher Filter. By default CakePHP bundles two filters:
