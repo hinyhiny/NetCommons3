@@ -181,6 +181,7 @@ Web の場合、ドキュメントルートを `app/webroot` に向けて順に�
 | 4 | **WYSIWYG で画像挿入 / ファイル添付** | アップロードできる | `$_FILES['full_path']` 混入で black-hole |
 | 5 | ユーザーを新規作成 | 作成できる | `space_id` の型比較ずれ |
 | 6 | MathJax を含む記事 | 数式が描画される | bower の MathJax が 3.x |
+| 7 | お問い合わせフォームから送信 | メールが届く | サイト設定のメールサーバ（SMTP / PHP `mail()`）と送信元アドレス。`app/tmp/logs/error.log` と MTA 側のログを見る |
 
 ```sh
 tail -f app/tmp/logs/error.log
