@@ -78,3 +78,17 @@
  		);
  
  		if (!empty($config['encoding'])) {
+
+--- a/vendors/cakephp/cakephp/lib/Cake/Error/ErrorHandler.php
++++ b/vendors/cakephp/cakephp/lib/Cake/Error/ErrorHandler.php
+@@ -204,7 +204,9 @@
+  * @return bool true if error was handled
+  */
+ 	public static function handleError($code, $description, $file = null, $line = null, $context = null) {
+-		if (error_reporting() === 0) {
++		// PHP8: @ は error_reporting() を 0 ではなく固定マスクにするため、
++		// 従来の === 0 判定では抑制が効かない（vendor の @filemtime 等がログに流れる）
++		if (!(error_reporting() & $code)) {
+ 			return false;
+ 		}
+ 		list($error, $log) = static::mapErrorCode($code);

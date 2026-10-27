@@ -212,9 +212,9 @@ tail -f app/tmp/logs/error.log
 
 | ファイル | 対象 | 修正 |
 | --- | --- | --- |
-| `patches/01-cakephp-2.10.24-php85.patch` | `cakephp/cakephp` 2.10.24 | `Shell::hasMethod()` の null ガード / `Folder::read()` の `array_values()` / `DboSource` の commit・rollback 吸収 / `Mysql` の `ATTR_STRINGIFY_FETCHES` |
+| `patches/01-cakephp-2.10.24-php85.patch` | `cakephp/cakephp` 2.10.24 | `Shell::hasMethod()` の null ガード / `Folder::read()` の `array_values()` / `DboSource` の commit・rollback 吸収 / `Mysql` の `ATTR_STRINGIFY_FETCHES` / `ErrorHandler::handleError()` の `@` 抑制判定（PHP 8 では `error_reporting()` が 0 にならない） |
 | `patches/02-cakedc-migrations-2.6.1-php85.patch` | `cakedc/migrations` 2.6.1 | 削除された `each()` を `reset()` / `key()` / `current()` に置換 |
-| `app/Config/bootstrap.php`（アプリ側） | 本体 | `$_FILES` の `full_path` 除去、`CakePlugin::load('Install')` |
+| `app/Config/bootstrap.php` / `app/Config/routes.php`（アプリ側） | 本体 | `$_FILES` の `full_path` 除去、`CakePlugin::load('Install', array('routes' => true))`、未インストール時の `CakePlugin::routes('Install')` |
 
 `vendors/` と `app/Plugin/` は `.gitignore` 対象なので、修正はパッチとして保持し `composer install` 時に当てている。
 
