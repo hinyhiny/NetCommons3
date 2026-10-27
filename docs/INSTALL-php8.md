@@ -15,10 +15,39 @@ sh scripts/setup-php8.sh
 最後に Web サーバのドキュメントルートを **`app/webroot`** に向けて `http://<host>/install` を開く。
 CUI で入れるなら `app/Console/cake install.install`。
 
-何が足りないかだけ知りたいとき（何も変更しない）:
+何が足りないかだけ知りたいときは `--check`（何も変更しない）:
 
 ```sh
 sh scripts/setup-php8.sh --check
+```
+
+### オプション
+
+| オプション | 動作 |
+| --- | --- |
+| （なし） | チェック → `composer install` → パッチ適用 → components 確認 |
+| `--check` | 変更せず判定のみ。パッチは逆適用のドライランで「適用済み」を判定する |
+| `--skip-composer` | 依存導入を飛ばして、パッチ適用と確認だけ行う |
+| `-h` / `--help` | 使い方を表示 |
+
+### 出力の見方
+
+3 種類のラベルで出る。`[要修正]` が 1 件でもあれば終了コード 1。
+
+| ラベル | 意味 |
+| --- | --- |
+| `[OK]` | 問題なし |
+| `[注意]` | 続行できるが確認したい（bower 未導入、スキップなど） |
+| `[要修正]` | 解消するまでインストール不可 |
+
+```
+== 1. PHP の確認 ==
+  [OK]     PHP 8.5.12（8.x）
+  [OK]     必要な拡張が揃っています
+== 5. 互換パッチの適用 ==
+  [OK]     適用済み patches/01-cakephp-2.10.24-php85.patch
+== 6. bower パッケージの取得数 ==
+  [OK]     app/webroot/components: 18 件
 ```
 
 ## 前提
@@ -40,7 +69,7 @@ sh scripts/setup-php8.sh --check
 | 2 | `composer` `git` `patch` `bower` の有無を確認 |
 | 3 | 書き込み権限を確認（`app/Config` `app/tmp` `app/Uploads` `app/webroot/{css,js,img,theme}`）。無いディレクトリは作成 |
 | 4 | `vendors/` が無ければ `composer install` |
-| 5 | 互換パッチを適用（冪等。2 回目以降は `[skip]`） |
+| 5 | 互換パッチを適用（冪等。`composer install` 直後は適用済みのため `[skip]` になる） |
 | 6 | `app/webroot/components` の取得数を確認 |
 
 ## データベース
@@ -77,7 +106,7 @@ Web の場合、ドキュメントルートを `app/webroot` に向けて順に�
 
 上から順に。**#4 が最重要**（ログインもページ作成も通った後に発覚する）。
 
-| # | 確認 | 期待 | NG の原因 |
+| # | 確認 | 期待 | 失敗時の原因 |
 | --- | --- | --- | --- |
 | 1 | `app/Console/cake` が起動 | ヘルプが出る | パッチ 01 未適用 |
 | 2 | 管理者でログイン | 管理画面に入れる | パッチ 01（`ATTR_STRINGIFY_FETCHES`） |
@@ -116,11 +145,19 @@ tail -f app/tmp/logs/error.log
 `vendors/` と `app/Plugin/` は `.gitignore` 対象なので、修正はパッチとして保持し `composer install` 時に当てている。
 
 ```sh
-# 適用（冪等）/ 状態確認 / 元に戻す
+# 適用（冪等）
 sh scripts/apply-php85-patches.sh
-patch -p1 -R -N -s --dry-run -i patches/01-cakephp-2.10.24-php85.patch && echo applied
+
+# 状態確認（全パッチまとめて・変更なし）
+sh scripts/setup-php8.sh --check
+
+# 元に戻す（パッチ単位。逆向きに当てる）
 patch -p1 -R -i patches/01-cakephp-2.10.24-php85.patch
+patch -p1 -R -i patches/02-cakedc-migrations-2.6.1-php85.patch
 ```
+
+元に戻すのは依存バージョンが変わっていない間だけ有効。バージョンを上げた後は逆適用できないので、
+その場合は該当パッケージを消して入れ直す（例: `rm -rf vendors/cakephp && composer install`）。
 
 ## 付録: 運用上の注意
 
