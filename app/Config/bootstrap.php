@@ -97,7 +97,7 @@ Cache::config('default', array('engine' => 'File'));
  *
  */
 CakePlugin::load('NetCommons', array('bootstrap' => true, 'routes' => true));
-CakePlugin::load('Install');
+CakePlugin::load('Install', array('routes' => true));
 
 /**
  * You can attach event listeners to the request lifecycle as Dispatcher Filter. By default CakePHP bundles two filters:
