@@ -1,7 +1,7 @@
 # NetCommons3 PHP 8.5.12 以降インストール手順
 
 > PHP の緊急セキュリティ対応が適用された PHP 8.5 で動作する NetCommons3 の、修正パッチ同梱インストーラーです（非公式）。
-> **PHP 8.5.12 以上が必須**です。8.4 以前はサポート対象外です。
+> **PHP 8.5.12 以上が必須**です。8.5.12 以前はサポート対象外です。
 > **アップデート（既存サイトの移行）を目的としていない**ため、システム検証などで新規に構築する場合に使えます。
 > ご利用に際しては、末尾の [付録: 運用上の注意](#付録-運用上の注意) を先に確認してください。
 > 問題があれば GitHub の [Issues](https://github.com/hinyhiny/NetCommons3/issues) でご連絡ください。
@@ -62,11 +62,12 @@ sh scripts/setup-php8.sh --check
 
 | 項目 | 要件 |
 | --- | --- |
-| PHP | **8.5.12 以上**（CLI と FPM を同じバージョンに。8.4 以前は非対応） |
+| PHP | **8.5.12 以上**（CLI と FPM を同じバージョンに。8.5.12 以前は非対応） |
 | PHP 拡張 | `pdo_mysql` `mbstring` `intl` `gd` `zip` `curl` `openssl` `fileinfo` `dom` `xml` `SimpleXML`（`exif` は任意） |
 | MySQL | 8.0 / 8.4（5.7 も可） |
 | コマンド | `composer` 2.x / `git` / `patch` / `node`+`npm`（bower 用） |
 | 権限 | `sudo` が使えること（`composer install` と、`app/Config` などへの書き込み権限の設定に使用） |
+| PHP 関数 | `exec()` が使えること。インストーラが `cake` を `exec()` で呼ぶ（aaPanel は FPM 側だけ既定で無効） |
 
 不足があれば `setup-php8.sh` が「要修正」として列挙する。`mcrypt` は不要（CakePHP 2.10 は openssl を使う）。
 
@@ -119,11 +120,24 @@ aaPanel の「実行ディレクトリ」はサイトディレクトリ直下の
    nginx -t && systemctl reload nginx
    ```
 
+5. FPM 側の `exec` を許可する（インストーラが `cake` を `exec()` で呼ぶため）
+
+   ```sh
+   # 例: PHP 8.5。disable_functions から exec だけを外す
+   cp -a /www/server/php/85/etc/php.ini /www/server/php/85/etc/php.ini.bak
+   sed -i 's/passthru,exec,system/passthru,system/' /www/server/php/85/etc/php.ini
+   /etc/init.d/php-fpm-85 reload
+   ```
+
+   画面から設定する場合は「App Store → PHP 8.5 → 設定 → 無効な関数」で `exec` を削除する。
+
 注意点:
 
 - 画面から「サイトディレクトリ」を変更すると conf が再生成され、`root` が戻る。その場合は 1 をやり直す。
 - `.user.ini`（`open_basedir`）はサイト直下のままでよい。`app/webroot` は配下なので許可される。
 - aaPanel は `.user.ini` に immutable 属性を付けるため `chown -R` が 1 件だけ失敗するが、無視してよい。
+- aaPanel は `php-cli.ini`（CLI）と `php.ini`（FPM）を分けており、CLI 側は `exec` が許可済み。そのため `setup-php8.sh` は通るのに Web インストーラだけ 500 になる、という分かりにくい症状になる。
+- `exec` はインストール完了後に戻してもよいが、戻す前に管理画面の一通りを確認しておく。
 
 ## データベース
 
@@ -179,7 +193,10 @@ tail -f app/tmp/logs/error.log
 | 症状 | 原因 | 対処 |
 | --- | --- | --- |
 | `[要修正] PHP 8.5.11 は非対応` と出る | 8.5.12 未満 | PHP を 8.5.12 以上に更新する（CVE 対応版） |
-| `/install` は出るが「同意」の後が 404 | Install プラグインを routes 無しで読み込んでいる | `app/Config/bootstrap.php` を `CakePlugin::load('Install', array('routes' => true))` に |
+| `/install` は出るが「同意」の後が 404（`InitPermissionController` が見つからない） | `CakePlugin::load(..., 'routes' => true)` は読込予約のみ。未インストール分岐で `CakePlugin::routes()` が呼ばれていない | `app/Config/routes.php` の未インストール分岐を `CakePlugin::routes('Install');` にする |
+| `/install/init_permission` が 500（`Call to undefined function exec()`） | aaPanel が FPM 側の `exec` を無効化している | `php.ini` の `disable_functions` から `exec` を外して php-fpm を再読込（[aaPanel の場合](#aapanel-の場合) の 5） |
+| 全ページが 500 になる | `/install/finish` を URL 直打ちで開いた。`finish()` は状態を見ずに `installed: true` を書き込む | `app/Config/application.yml` の `installed:` を `false` にして `/install` を開き直す |
+| 「imagick が見つかりません」と出る | ImageMagick 未導入（`gd` で代替可） | 警告のみで続行できる。必要なら imagick を追加 |
 | aaPanel の実行ディレクトリに `app/webroot` が無い | 1 階層しか選べない仕様 | nginx conf の `root` を直接書き換える（[Web サーバの設定](#web-サーバの設定)） |
 | `composer install` が `requires php <8.0` で停止 | `config.platform.php` が消えた | `composer.json` の `7.4.33` を戻す |
 | `composer install` は成功したのに UI が崩れる | bower 未導入（**失敗が無音**） | `npm install -g bower && bower --allow-root update` |
