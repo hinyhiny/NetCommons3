@@ -43,10 +43,10 @@ if ! command -v php >/dev/null 2>&1; then
 else
 	PHP_VERSION=$(php -r 'echo PHP_VERSION;')
 	PHP_ID=$(php -r 'echo PHP_VERSION_ID;')
-	if [ "$PHP_ID" -ge 80000 ]; then
-		ok "PHP ${PHP_VERSION}（8.x）"
+	if [ "$PHP_ID" -ge 80512 ]; then
+		ok "PHP ${PHP_VERSION}"
 	else
-		warn "PHP $PHP_VERSION は 8.0 未満。互換パッチは不要です（当てても動作に影響なし）"
+		bad "PHP ${PHP_VERSION} は非対応。8.5.12 以上が必要です（CVE 対応版）"
 	fi
 	missing=""
 	for ext in $EXT_REQUIRED; do

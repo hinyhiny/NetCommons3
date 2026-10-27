@@ -1,13 +1,14 @@
-# NetCommons3 PHP 8.x インストール手順
+# NetCommons3 PHP 8.5.12 以降インストール手順
 
 > PHP の緊急セキュリティ対応が適用された PHP 8.5 で動作する NetCommons3 の、修正パッチ同梱インストーラーです（非公式）。
+> **PHP 8.5.12 以上が必須**です。8.4 以前はサポート対象外です。
 > **アップデート（既存サイトの移行）を目的としていない**ため、システム検証などで新規に構築する場合に使えます。
 > ご利用に際しては、末尾の [付録: 運用上の注意](#付録-運用上の注意) を先に確認してください。
 > 問題があれば GitHub の [Issues](https://github.com/hinyhiny/NetCommons3/issues) でご連絡ください。
 > ご利用には `sudo` が使えるサーバー環境が必要です。
 
 互換パッチは `composer install` 時に自動適用される。
-検証済み: PHP 8.5.12 / MySQL 8.4 / macOS（ServBay）。Linux は未検証だが手順は同じ。
+検証: PHP 8.5.12 / MySQL 8.4 / macOS（ServBay）と Debian 12 + nginx。**要件は PHP 8.5.12 以上**。
 NetCommons3 本体の概要・ライセンスは [README.md](../README.md) を参照。
 
 ## クイックスタート
@@ -49,7 +50,7 @@ sh scripts/setup-php8.sh --check
 
 ```
 == 1. PHP の確認 ==
-  [OK]     PHP 8.5.12（8.x）
+  [OK]     PHP 8.5.12
   [OK]     必要な拡張が揃っています
 == 5. 互換パッチの適用 ==
   [OK]     適用済み patches/01-cakephp-2.10.24-php85.patch
@@ -61,7 +62,7 @@ sh scripts/setup-php8.sh --check
 
 | 項目 | 要件 |
 | --- | --- |
-| PHP | 8.0 以上（CLI と FPM を同じバージョンに） |
+| PHP | **8.5.12 以上**（CLI と FPM を同じバージョンに。8.4 以前は非対応） |
 | PHP 拡張 | `pdo_mysql` `mbstring` `intl` `gd` `zip` `curl` `openssl` `fileinfo` `dom` `xml` `SimpleXML`（`exif` は任意） |
 | MySQL | 8.0 / 8.4（5.7 も可） |
 | コマンド | `composer` 2.x / `git` / `patch` / `node`+`npm`（bower 用） |
@@ -133,6 +134,7 @@ tail -f app/tmp/logs/error.log
 
 | 症状 | 原因 | 対処 |
 | --- | --- | --- |
+| `[要修正] PHP 8.5.11 は非対応` と出る | 8.5.12 未満 | PHP を 8.5.12 以上に更新する（CVE 対応版） |
 | `composer install` が `requires php <8.0` で停止 | `config.platform.php` が消えた | `composer.json` の `7.4.33` を戻す |
 | `composer install` は成功したのに UI が崩れる | bower 未導入（**失敗が無音**） | `npm install -g bower && bower --allow-root update` |
 | `cake` が `ReflectionMethod ... must be of type string` | パッチ 01 未適用 | `sh scripts/apply-php85-patches.sh` |
@@ -172,6 +174,6 @@ patch -p1 -R -i patches/02-cakedc-migrations-2.6.1-php85.patch
 - **`composer update` を実行しない。** `composer.lock` の ref にパッチが紐づいている。依存を上げるときはパッチ再作成と確認をセットで。
 - デプロイは「`git pull` → `composer install`」。パッチは自動で当たる。
 - 本番は `app/Config/core.php` の `debug` を `0` に。
-- **CakePHP 2.x は 2021 年に EOL**。セキュリティパッチは来ない。PHP 8.5 で動くのは延命であって安全になるわけではない。
+- **CakePHP 2.x は 2021 年に EOL**。セキュリティパッチは来ない。PHP 8.5.12 以上で動かすのは延命であって、アプリ側が安全になるわけではない。
 - ライセンスは FreeBSD License（`license.txt`）。再配布時は著作権表示と条件文の同梱が必要。
   「NetCommons」は情報・システム研究機構の登録商標なので、名称を冠した配布物は事前確認。

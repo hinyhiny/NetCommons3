@@ -1,12 +1,12 @@
-# NetCommons3 PHP 8.5 対応パッチ同梱インストーラー
+# NetCommons3 PHP 8.5.12 以降 対応パッチ同梱インストーラー
 
-PHP の緊急セキュリティ対応が適用された PHP 8.5 で動作する NetCommons3 の、修正パッチ同梱インストーラーです。
+PHP の緊急セキュリティ対応が適用された PHP 8.5.12 以降で動作する NetCommons3 の、修正パッチ同梱インストーラーです。
 **アップデート（既存サイトの移行）を目的としていない**ため、システム検証などで新規に構築する場合に使えます。
 
 | | |
 | --- | --- |
 | 手順書 | **[docs/INSTALL-php8.md](docs/INSTALL-php8.md)** |
-| 動作環境 | PHP 8.5 / MySQL 8.0・8.4 / `sudo` が使えるサーバー環境 |
+| 動作環境 | PHP 8.5.12 以上 / MySQL 8.0・8.4 / `sudo` が使えるサーバー環境 |
 | 問い合わせ | [Issues](https://github.com/hinyhiny/NetCommons3/issues) |
 
 ## クイックスタート
