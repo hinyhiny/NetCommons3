@@ -27,7 +27,8 @@ if (!Configure::read('NetCommons.installed')) {
  * Load all plugin routes. See the CakePlugin documentation on
  * how to customize the loading of plugin routes.
  */
-	//CakePlugin::routes();
+	// 未インストール時は /install/:action のみ必要。NetCommons の汎用ルートは読まない。
+	CakePlugin::routes('Install');
 } else {
 	Router::connect('/', array('controller' => 'pages', 'action' => 'index', 'plugin' => 'pages'));
 
