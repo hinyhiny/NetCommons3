@@ -1,6 +1,12 @@
 # NetCommons3 PHP 8.x インストール手順
 
-PHP 8.0〜8.5 で NetCommons3 を新規構築する。互換パッチは `composer install` 時に自動適用される。
+> PHP の緊急セキュリティ対応が適用された PHP 8.5 で動作する NetCommons3 の、修正パッチ同梱インストーラーです。
+> **アップデート（既存サイトの移行）を目的としていない**ため、システム検証などで新規に構築する場合に使えます。
+> ご利用に際しては、末尾の [付録: 運用上の注意](#付録-運用上の注意) を先に確認してください。
+> 問題があれば GitHub の [Issues](https://github.com/hinyhiny/NetCommons3/issues) でご連絡ください。
+> ご利用には root 権限のあるサーバー環境が必要です。
+
+互換パッチは `composer install` 時に自動適用される。
 検証済み: PHP 8.5.12 / MySQL 8.4 / macOS（ServBay）。Linux は未検証だが手順は同じ。
 
 ## クイックスタート
@@ -58,6 +64,7 @@ sh scripts/setup-php8.sh --check
 | PHP 拡張 | `pdo_mysql` `mbstring` `intl` `gd` `zip` `curl` `openssl` `fileinfo` `dom` `xml` `SimpleXML` `exif` |
 | MySQL | 8.0 / 8.4（5.7 も可） |
 | コマンド | `composer` 2.x / `git` / `patch` / `node`+`npm`（bower 用） |
+| 権限 | root（または sudo）。`composer install` と、`app/Config` などへの書き込み権限の設定に必要 |
 
 不足があれば `setup-php8.sh` が「要修正」として列挙する。`mcrypt` は不要（CakePHP 2.10 は openssl を使う）。
 
