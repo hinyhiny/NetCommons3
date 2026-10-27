@@ -6,6 +6,10 @@ NetCommons
 
 [NetCommons公式サイト](http://www.netcommons.org/)
 
+> **このフォークについて（PHP 8.x 対応）**
+> PHP 8.0〜8.5 で動作させるための互換パッチを `patches/` に保持し、`composer install` 時に自動適用しています。
+> 新規インストールの手順は [docs/INSTALL-php8.md](docs/INSTALL-php8.md) を参照してください。
+
 [![Build Status](https://travis-ci.org/NetCommons3/NetCommons3.png?branch=master)](https://travis-ci.org/NetCommons3/NetCommons3)
 [![Coverage Status](https://coveralls.io/repos/NetCommons3/NetCommons3/badge.png?branch=master)](https://coveralls.io/r/NetCommons3/NetCommons3?branch=master)
 
