@@ -5,6 +5,9 @@
         "This file is @generated automatically"
     ],
     "content-hash": "26996a992a3afe63b7f635b8de3a32cf",
+    "platform-overrides": {
+        "php": "7.4.33"
+    },
     "packages": [
         {
             "name": "cakedc/migrations",
