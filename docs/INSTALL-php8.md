@@ -1,7 +1,7 @@
 # NetCommons3 PHP 8.5.12 以降インストール手順
 
 > PHP の緊急セキュリティ対応が適用された PHP 8.5 で動作する NetCommons3 の、修正パッチ同梱インストーラーです（非公式）。
-> **PHP 8.5.12 以上が必須**です。8.5.12 以前はサポート対象外です。
+> **PHP 8.5.12 以上が必須**です。8.5.11 以下のバージョンはサポート対象外です。
 > **アップデート（既存サイトの移行）を目的としていない**ため、システム検証などで新規に構築する場合に使えます。
 > ご利用に際しては、末尾の [付録: 運用上の注意](#付録-運用上の注意) を先に確認してください。
 > 問題があれば GitHub の [Issues](https://github.com/hinyhiny/NetCommons3/issues) でご連絡ください。
@@ -62,7 +62,7 @@ sh scripts/setup-php8.sh --check
 
 | 項目 | 要件 |
 | --- | --- |
-| PHP | **8.5.12 以上**（CLI と FPM を同じバージョンに。8.5.12 以前は非対応） |
+| PHP | **8.5.12 以上**（CLI と FPM を同じバージョンに。8.5.11 以下は非対応） |
 | PHP 拡張 | `pdo_mysql` `mbstring` `intl` `gd` `zip` `curl` `openssl` `fileinfo` `dom` `xml` `SimpleXML`（`exif` は任意） |
 | MySQL | 8.0 / 8.4（5.7 も可） |
 | コマンド | `composer` 2.x / `git` / `patch` / `node`+`npm`（bower 用） |
@@ -193,7 +193,7 @@ tail -f app/tmp/logs/error.log
 
 | 症状 | 原因 | 対処 |
 | --- | --- | --- |
-| `[要修正] PHP 8.5.11 は非対応` と出る | 8.5.12 未満 | PHP を 8.5.12 以上に更新する（CVE 対応版） |
+| `[要修正] PHP 8.5.11 は非対応` と出る | 8.5.11 以下 | PHP を 8.5.12 以上に更新する（CVE 対応版） |
 | `/install` は出るが「同意」の後が 404（`InitPermissionController` が見つからない） | `CakePlugin::load(..., 'routes' => true)` は読込予約のみ。未インストール分岐で `CakePlugin::routes()` が呼ばれていない | `app/Config/routes.php` の未インストール分岐を `CakePlugin::routes('Install');` にする |
 | `/install/init_permission` が 500（`Call to undefined function exec()`） | aaPanel が FPM 側の `exec` を無効化している | `php.ini` の `disable_functions` から `exec` を外して php-fpm を再読込（[aaPanel の場合](#aapanel-の場合) の 5） |
 | 全ページが 500 になる | `/install/finish` を URL 直打ちで開いた。`finish()` は状態を見ずに `installed: true` を書き込む | `app/Config/application.yml` の `installed:` を `false` にして `/install` を開き直す |
