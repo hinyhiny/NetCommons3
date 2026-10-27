@@ -30,7 +30,7 @@ sh scripts/setup-php8.sh --check
 | MySQL | 8.0 / 8.4（5.7 も可） |
 | コマンド | `composer` 2.x / `git` / `patch` / `node`+`npm`（bower 用） |
 
-不足があれば `setup-php8.sh` が NG として列挙する。`mcrypt` は不要（CakePHP 2.10 は openssl を使う）。
+不足があれば `setup-php8.sh` が「要修正」として列挙する。`mcrypt` は不要（CakePHP 2.10 は openssl を使う）。
 
 ## setup スクリプトがやること
 

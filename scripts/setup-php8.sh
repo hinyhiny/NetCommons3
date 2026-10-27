@@ -20,14 +20,14 @@ for arg in "$@"; do
 		--check) CHECK_ONLY=1 ;;
 		--skip-composer) SKIP_COMPOSER=1 ;;
 		-h|--help) sed -n '2,10p' "$0"; exit 0 ;;
-		*) echo "unknown option: $arg" >&2; exit 2 ;;
+		*) echo "不明なオプションです: $arg" >&2; exit 2 ;;
 	esac
 done
 
 ng=0
-ok()   { echo "  ok    $1"; }
-warn() { echo "  warn  $1"; }
-bad()  { echo "  NG    $1"; ng=$((ng + 1)); }
+ok()   { echo "  [OK]     $1"; }
+warn() { echo "  [注意]   $1"; }
+bad()  { echo "  [要修正] $1"; ng=$((ng + 1)); }
 
 # インストーラ (InstallValidatorUtil) が要求する書き込みパス
 WRITABLES="app/Config app/tmp app/Uploads app/webroot/css app/webroot/js app/webroot/img app/webroot/theme"
@@ -35,7 +35,7 @@ WRITABLES="app/Config app/tmp app/Uploads app/webroot/css app/webroot/js app/web
 # 拡張は「無いと実際に落ちるもの」だけを必須扱いにする
 EXT_REQUIRED="pdo_mysql mbstring intl gd zip curl openssl fileinfo dom xml SimpleXML exif"
 
-echo "== 1. PHP =="
+echo "== 1. PHP の確認 =="
 if ! command -v php >/dev/null 2>&1; then
 	bad "php が見つかりません"
 else
@@ -57,7 +57,7 @@ else
 	fi
 fi
 
-echo "== 2. コマンド =="
+echo "== 2. 必要なコマンド =="
 for cmd in composer git patch; do
 	if command -v "$cmd" >/dev/null 2>&1; then
 		ok "$cmd"
@@ -88,7 +88,7 @@ for dir in $WRITABLES; do
 	fi
 done
 
-echo "== 4. 依存の導入 =="
+echo "== 4. 依存パッケージの導入 =="
 if [ "$CHECK_ONLY" -eq 1 ]; then
 	warn "--check のためスキップ"
 elif [ "$SKIP_COMPOSER" -eq 1 ]; then
@@ -102,7 +102,7 @@ else
 	fi
 fi
 
-echo "== 5. 互換パッチ =="
+echo "== 5. 互換パッチの適用 =="
 if [ ! -f scripts/apply-php85-patches.sh ]; then
 	bad "scripts/apply-php85-patches.sh がありません"
 elif [ "$CHECK_ONLY" -eq 1 ]; then
@@ -123,7 +123,7 @@ else
 	bad "パッチが適用できません（patches/README.md を確認）"
 fi
 
-echo "== 6. bower パッケージ =="
+echo "== 6. bower パッケージの取得数 =="
 if [ -d app/webroot/components ]; then
 	COUNT=$(ls app/webroot/components | wc -l | tr -d ' ')
 	if [ "$COUNT" -ge 15 ]; then
