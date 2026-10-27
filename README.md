@@ -1,3 +1,35 @@
+# NetCommons3 PHP 8.5 対応パッチ同梱インストーラー（非公式フォーク）
+
+PHP の緊急セキュリティ対応が適用された PHP 8.5 で動作する NetCommons3 の、修正パッチ同梱インストーラーです。
+**アップデート（既存サイトの移行）を目的としていない**ため、システム検証などで新規に構築する場合に使えます。
+
+| | |
+| --- | --- |
+| 手順書 | **[docs/INSTALL-php8.md](docs/INSTALL-php8.md)** |
+| 動作環境 | PHP 8.5 / MySQL 8.0・8.4 / `sudo` が使えるサーバー環境 |
+| 問い合わせ | [Issues](https://github.com/hinyhiny/NetCommons3/issues) |
+
+## クイックスタート
+
+```sh
+git clone https://github.com/hinyhiny/NetCommons3.git
+cd NetCommons3
+sh scripts/setup-php8.sh
+```
+
+前提チェック → `composer install`（互換パッチ自動適用）→ 書き込み権限の確認までを 1 コマンドで実行します。
+そのあと Web サーバのドキュメントルートを `app/webroot` に向けて `http://<host>/install` を開いてください。
+詳しい手順と確認項目は [docs/INSTALL-php8.md](docs/INSTALL-php8.md) にあります。
+
+ご利用に際しては、先に **[運用上の注意](docs/INSTALL-php8.md#付録-運用上の注意)** を確認してください。
+
+---
+
+## upstream の README
+
+以下は upstream（`NetCommons3/NetCommons3`）の README をそのまま残したものです。
+Vagrant / PHP 5.x〜7.x 前提の記述なので、**PHP 8.x での構築には上の手順書を使ってください。**
+
 NetCommons
 =======
 
@@ -5,10 +37,6 @@ NetCommons
 こちらのリポジトリは最新版として開発中のv3となります。安定版ではありませんのでご注意ください。現在の安定版については[こちらのレポジトリ](https://github.com/netcommons)をご覧ください。
 
 [NetCommons公式サイト](http://www.netcommons.org/)
-
-> **このフォークについて（PHP 8.x 対応）**
-> PHP 8.0〜8.5 で動作させるための互換パッチを `patches/` に保持し、`composer install` 時に自動適用しています。
-> 新規インストールの手順は [docs/INSTALL-php8.md](docs/INSTALL-php8.md) を参照してください。
 
 [![Build Status](https://travis-ci.org/NetCommons3/NetCommons3.png?branch=master)](https://travis-ci.org/NetCommons3/NetCommons3)
 [![Coverage Status](https://coveralls.io/repos/NetCommons3/NetCommons3/badge.png?branch=master)](https://coveralls.io/r/NetCommons3/NetCommons3?branch=master)

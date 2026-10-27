@@ -8,6 +8,7 @@
 
 互換パッチは `composer install` 時に自動適用される。
 検証済み: PHP 8.5.12 / MySQL 8.4 / macOS（ServBay）。Linux は未検証だが手順は同じ。
+NetCommons3 本体の概要・ライセンスは [README.md](../README.md) を参照。
 
 ## クイックスタート
 
