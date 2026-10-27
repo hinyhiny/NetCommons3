@@ -33,7 +33,9 @@ bad()  { echo "  [要修正] $1"; ng=$((ng + 1)); }
 WRITABLES="app/Config app/tmp app/Uploads app/webroot/css app/webroot/js app/webroot/img app/webroot/theme"
 
 # 拡張は「無いと実際に落ちるもの」だけを必須扱いにする
-EXT_REQUIRED="pdo_mysql mbstring intl gd zip curl openssl fileinfo dom xml SimpleXML exif"
+EXT_REQUIRED="pdo_mysql mbstring intl gd zip curl openssl fileinfo dom xml SimpleXML"
+# 無くても動くが、あると望ましいもの
+EXT_OPTIONAL="exif"
 
 echo "== 1. PHP の確認 =="
 if ! command -v php >/dev/null 2>&1; then
@@ -54,6 +56,13 @@ else
 		ok "必要な拡張が揃っています"
 	else
 		bad "不足している拡張:$missing"
+	fi
+	missing_opt=""
+	for ext in $EXT_OPTIONAL; do
+		php -m | grep -qx "$ext" || missing_opt="$missing_opt $ext"
+	done
+	if [ -n "$missing_opt" ]; then
+		warn "任意の拡張が未導入:$missing_opt（動作に影響なし）"
 	fi
 fi
 
@@ -109,12 +118,19 @@ elif [ "$CHECK_ONLY" -eq 1 ]; then
 	# 変更せず、適用済みかどうかだけ判定する
 	for p in patches/*.patch; do
 		[ -f "$p" ] || continue
-		if patch -p1 -R -N -s --dry-run -i "$p" >/dev/null 2>&1; then
+		# 依存が未導入だと判定できないので、先に対象ファイルの有無を見る
+		absent=""
+		for t in $(grep '^+++ b/' "$p" | sed 's|^+++ b/||'); do
+			[ -f "$t" ] || absent="$absent $t"
+		done
+		if [ -n "$absent" ]; then
+			warn "判定不可 $p（対象ファイルが未導入:$absent）"
+		elif patch -p1 -R -N -s --dry-run -i "$p" >/dev/null 2>&1; then
 			ok "適用済み $p"
 		elif patch -p1 -N -s --dry-run -i "$p" >/dev/null 2>&1; then
 			warn "未適用 $p（--check では適用しません）"
 		else
-			bad "文脈が一致しません $p"
+			bad "文脈が一致しません $p（依存バージョンが変わった可能性）"
 		fi
 	done
 elif sh scripts/apply-php85-patches.sh; then
@@ -142,6 +158,6 @@ if [ "$ng" -eq 0 ]; then
 	echo "  2) http://<host>/install を開く（CUI なら app/Console/cake install.install）"
 	exit 0
 else
-	echo "未解決の項目が $ng 件あります。上の NG を解消してから再実行してください。"
+	echo "未解決の項目が $ng 件あります。上の [要修正] を解消してから再実行してください。"
 	exit 1
 fi

@@ -62,7 +62,7 @@ sh scripts/setup-php8.sh --check
 | 項目 | 要件 |
 | --- | --- |
 | PHP | 8.0 以上（CLI と FPM を同じバージョンに） |
-| PHP 拡張 | `pdo_mysql` `mbstring` `intl` `gd` `zip` `curl` `openssl` `fileinfo` `dom` `xml` `SimpleXML` `exif` |
+| PHP 拡張 | `pdo_mysql` `mbstring` `intl` `gd` `zip` `curl` `openssl` `fileinfo` `dom` `xml` `SimpleXML`（`exif` は任意） |
 | MySQL | 8.0 / 8.4（5.7 も可） |
 | コマンド | `composer` 2.x / `git` / `patch` / `node`+`npm`（bower 用） |
 | 権限 | `sudo` が使えること（`composer install` と、`app/Config` などへの書き込み権限の設定に使用） |
