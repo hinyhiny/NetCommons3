@@ -81,6 +81,50 @@ sh scripts/setup-php8.sh --check
 | 5 | 互換パッチを適用（冪等。`composer install` 直後は適用済みのため `[skip]` になる） |
 | 6 | `app/webroot/components` の取得数を確認 |
 
+## Web サーバの設定
+
+ドキュメントルートは **`<repo>/app/webroot`** にする。`app/` 配下には DB パスワードを含む
+`app/Config/database.php` があるため、リポジトリ直下をそのまま公開してはいけない。
+
+CakePHP はすべてのリクエストを `index.php` に通すので、rewrite も必要。
+
+```nginx
+location / {
+    try_files $uri $uri/ /index.php?$args;
+}
+```
+
+### aaPanel の場合
+
+aaPanel の「実行ディレクトリ」はサイトディレクトリ直下の 1 階層しか選べないため、
+2 階層下の `app/webroot` を画面から指定できない。**設定ファイルを直接編集する。**
+
+1. `/www/server/panel/vhost/nginx/<domain>.conf` の `root` を書き換える
+
+   ```nginx
+   root /www/wwwroot/<domain>/app/webroot;
+   ```
+
+2. `/www/server/panel/vhost/rewrite/<domain>.conf` に上の `location /` を書く
+
+3. 所有者を Web サーバユーザに合わせる
+
+   ```sh
+   chown -R www:www /www/wwwroot/<domain>
+   ```
+
+4. 反映する
+
+   ```sh
+   nginx -t && systemctl reload nginx
+   ```
+
+注意点:
+
+- 画面から「サイトディレクトリ」を変更すると conf が再生成され、`root` が戻る。その場合は 1 をやり直す。
+- `.user.ini`（`open_basedir`）はサイト直下のままでよい。`app/webroot` は配下なので許可される。
+- aaPanel は `.user.ini` に immutable 属性を付けるため `chown -R` が 1 件だけ失敗するが、無視してよい。
+
 ## データベース
 
 インストーラが `CREATE DATABASE` から実行するので、**CREATE 権限のあるユーザ**を渡せば事前準備は不要。
@@ -135,6 +179,8 @@ tail -f app/tmp/logs/error.log
 | 症状 | 原因 | 対処 |
 | --- | --- | --- |
 | `[要修正] PHP 8.5.11 は非対応` と出る | 8.5.12 未満 | PHP を 8.5.12 以上に更新する（CVE 対応版） |
+| `/install` は出るが「同意」の後が 404 | Install プラグインを routes 無しで読み込んでいる | `app/Config/bootstrap.php` を `CakePlugin::load('Install', array('routes' => true))` に |
+| aaPanel の実行ディレクトリに `app/webroot` が無い | 1 階層しか選べない仕様 | nginx conf の `root` を直接書き換える（[Web サーバの設定](#web-サーバの設定)） |
 | `composer install` が `requires php <8.0` で停止 | `config.platform.php` が消えた | `composer.json` の `7.4.33` を戻す |
 | `composer install` は成功したのに UI が崩れる | bower 未導入（**失敗が無音**） | `npm install -g bower && bower --allow-root update` |
 | `cake` が `ReflectionMethod ... must be of type string` | パッチ 01 未適用 | `sh scripts/apply-php85-patches.sh` |
