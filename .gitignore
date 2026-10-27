@@ -24,6 +24,13 @@ TAGS
 /app/webroot/css/*.dev.css
 /app/webroot/components
 /app/Plugin/
+
+# インストール時にプラグインから app/webroot へコピーされる生成物
+/app/webroot/css/*/
+/app/webroot/js/*/
+/app/webroot/img/*/
+/app/webroot/theme/*/
+/app/Uploads
 /.settings
 /.buildpath
 /.project
